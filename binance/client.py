@@ -170,7 +170,7 @@ class BaseClient(ABC):
 
         if signed:
             # generate signature
-            kwargs['data']['timestamp'] = int(time.time() * 1000) + self._timeoffset
+            kwargs['data']['timestamp'] = int((time.time() + self._timeoffset) * 1000)
             kwargs['data']['signature'] = self._generate_signature(kwargs['data'])
 
         # sort get and post params to match signature order
