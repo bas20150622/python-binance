@@ -93,6 +93,12 @@ class BaseClient(ABC):
         self.API_SECRET = api_secret
         self.session = self._init_session()
         self._requests_params = requests_params
+        self._timeoffset = self._get_server_timedelta()
+
+    def _get_server_timedelta(self):
+        APITIME = int(requests.get('https://api.binance.com/api/v3/time').json()['serverTime'])
+        PCTIME = int(time.time() * 1000)
+        return (PCTIME - APITIME) / 1000
 
     def _get_headers(self):
         return {
@@ -164,7 +170,7 @@ class BaseClient(ABC):
 
         if signed:
             # generate signature
-            kwargs['data']['timestamp'] = int(time.time() * 1000)
+            kwargs['data']['timestamp'] = int(time.time() * 1000) + self._timeoffset
             kwargs['data']['signature'] = self._generate_signature(kwargs['data'])
 
         # sort get and post params to match signature order
