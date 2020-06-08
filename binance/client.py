@@ -103,6 +103,12 @@ class Client(object):
 
         # init DNS and SSL cert
         self.ping()
+        self._timeoffset = self._get_server_timedelta()
+
+    def _get_server_timedelta(self):
+        APITIME = int(requests.get('https://api.binance.com/api/v3/time').json()['serverTime'])
+        PCTIME = int(time.time() * 1000)
+        return (PCTIME - APITIME) / 1000
 
     def _init_session(self):
 
@@ -176,7 +182,7 @@ class Client(object):
 
         if signed:
             # generate signature
-            kwargs['data']['timestamp'] = int(time.time() * 1000)
+            kwargs['data']['timestamp'] = int(time.time() * 1000) + self._timeoffset
             kwargs['data']['signature'] = self._generate_signature(kwargs['data'])
 
         # sort get and post params to match signature order
